@@ -1,0 +1,386 @@
+Sub createCentralWorksheet()
+'Check if worksheet exists **
+    For i = 1 To Worksheets.Count
+        'If worksheet exists
+        If Worksheets(i).Name = "Region_Central" Then
+            exists = True
+        End If
+
+    Next
+
+    'Else ......
+    If Not exists Then
+    'Create new worksheet for each region
+        Sheets.Add(after:=Sheets(Sheets.Count)).Name = "Region_Central"
+
+        'Copy header from original copy to the new worksheet
+        Worksheets("SalesOrders").Range("A1:G1").Copy _
+            Worksheets("Region_Central").Range("A1:G1")
+    End If
+
+End Sub
+Sub btnSort_Click()
+    'Turn off auto screen update - save processing time & memory space in MS Excel ... to hide the background process
+    Application.ScreenUpdating = False
+
+    'Make sure the sheet "SalesOrders" is selected
+    Sheets("SalesOrders").Select
+
+    'Count number of records available in the sheet
+    r = Range("A1").End(xlDown).Row
+
+    'check if option button is selected
+    If ActiveSheet.OptionButtons("optRegion").Value = xlOff And _
+        ActiveSheet.OptionButtons("optItem").Value = xlOff Then
+
+         'If none of them selected, prompt user error message
+         MsgBox ("Please select and option to proceed...")
+
+    End If
+
+    'If optRegion is selected
+    If ActiveSheet.OptionButtons("optRegion").Value = xlOn Then
+        'Call createCentralWorksheet() program in this program
+        Call createCentralWorksheet
+
+        'Return to sheet "Sales Orders"
+        Sheets("SalesOrders").Select
+
+        'Create a variable c to hold number of row index in the "Region_Central" Sheet
+        C = 2
+
+        'Using for loop to loop from the last record to the second records
+        'in the sheet "SalesOrders". Each time, -1 from the q value
+        For q = r To 2 Step -1
+            'If the word "Central" found in column B
+            If Range("B" & q).Value = "Central" Then
+                'Copy the record from celles in Column A to Column G
+                Range(Cells(q, "A"), Cells(q, "G")).Copy
+                'Go to sheet "Region_Central"
+                Sheets("Region_Central").Select
+                Cells(C, "A").Select
+                'Paste the Record
+                ActiveSheet.Paste
+                'Increase c by 1
+                C = C + 1
+                'Go back to sheet "SalesOrders" to look for the next matching records
+                Sheets("SalesOrders").Select
+            End If
+
+        Next
+
+    End If
+
+    'sort the records in sheet "Region_Central" according to the total sales value
+    'Check if worksheet exists **
+    For i = 1 To Worksheets.Count
+        'If worksheet exists
+        If Worksheets(i).Name = "Region_Central" Then
+            'Select the worksheet
+            Sheets("Region_Central").Select
+            'Sort the records
+            Columns("A:G").Sort key1:=Range("G2"), order1:=xlDescending, Header:=xlYes
+        End If
+
+    Next
+
+    'Turn on auto screen update ater all processing is done
+    Application.ScreenUpdating = True
+
+End Sub
+Sub clearHighlight()
+
+    Sheets("Region_Central").Select
+    r = Range("A1").End(xlDown).Row
+
+    For i = 2 To r
+    'Reset the background color to default (transparent)
+        Range("A" & i).EntireRow.Interior.Color = xlNone
+        Range("A" & i).EntireRow.Font.Color = vbBlack
+    Next
+
+End Sub
+Sub highlightLowest()
+     'Go to sheet "Region_Central"
+        Sheets("Region_Central").Select
+
+        'Find the last row in the sheet
+        lr = Range("A1").End(xlDown).Row
+
+        'Higlight the records
+        'Change background color of the record to red
+        Range(Cells(lr, "A"), Cells(lr, "G")).Interior.Color = vbRed
+        'Change font color of the record to white
+        Range("A" & lr).EntireRow.Font.Color = vbWhite
+
+        Sheets("SalesOrders").Select
+
+End Sub
+Sub higlightHighest()
+       'Go to sheet "Region_Central"
+        Sheets("Region_Central").Select
+
+
+        'Higlight the records
+        'Change background color of the record to red
+        Range("A2:G2").Interior.Color = vbYellow
+        'Change font color of the record to white
+        Range("A2:G2").EntireRow.Font.Color = vbBlack
+
+        Sheets("SalesOrders").Select
+
+End Sub
+Sub btnHiglight_Click()
+    'Ensure sheet "SalesOrders" is selected
+    Sheets("SalesOrders").Select
+
+    'Check if any checkboxes is being selected
+    If ActiveSheet.CheckBoxes("chkLowestSales").Value = xlOff And _
+        ActiveSheet.CheckBoxes("chkHighestSales").Value = xlOff Then
+
+        MsgBox "Please tick on the check-box to proceed....", , "Error"
+
+    End If
+
+    'Check lowest Sales selected
+    If ActiveSheet.CheckBoxes("chkLowestSales").Value = xlOn Then
+        Call clearHighlight
+        Call highlightLowest
+    End If
+
+    'Check Highest Sales selected
+    If ActiveSheet.CheckBoxes("chkHighestSales").Value = xlOn Then
+        Call clearHighlight
+        Call higlightHighest
+    End If
+
+
+    'Check Highest Sales selected
+    If ActiveSheet.CheckBoxes("chkHighestSales").Value = xlOn And _
+        ActiveSheet.CheckBoxes("chkLowestSales").Value = xlOn Then
+        Call clearHighlight
+        Call higlightHighest
+        Call highlightLowest
+
+    End If
+
+End Sub
+
+Sub btnSearchRep_Click()
+'*****************************************
+'*** search record based on user input ***
+'*****************************************
+
+    'Turn off auto screen update - save processing time & memory space in MS Excel ... to hide the background process
+    Application.ScreenUpdating = False
+
+    'Make sure we are working on sheets "SalesOrders"
+    Sheets("SalesOrders").Select
+
+    'Get user to enter Rep name on the dialog box
+    mySearch = InputBox("Please enter the rep name", "Search Rep Name")
+
+    'Count number of rows in the sheets "SalesOrders"
+    r = Range("A" & Rows.Count).End(xlUp).Row
+
+    'using the for loop to find the rep name
+    For i = 2 To r
+
+        If UCase(Range("C" & i).Value) = UCase(mySearch) Then
+        'Higlight the entire record background to RED
+            Range(Cells(i, "A"), Cells(i, "G")).Interior.Color = vbRed
+        'Change font color to red
+            Range("C" & i).EntireRow.Font.Color = vbWhite
+
+        'Increase the counter by 1
+            counter = counter + 1
+        End If
+
+    Next
+
+    'Display to user appropraiate message box
+    If counter = 0 Then
+        MsgBox "Record Not Found", , "Error"
+    Else
+        MsgBox counter & " records found and higligted", , "Record Found"
+    End If
+
+    Application.ScreenUpdating = True
+End Sub
+
+Sub btnClear_Click()
+    'Make sure we are working on sheets "SalesOrders"
+    Sheets("SalesOrders").Select
+
+    'Count the number of records in the sheet
+    r = Range("A" & Rows.Count).End(xlUp).Row
+
+    'Using for loop to clear all formatting
+    For i = 2 To r
+        Range("A" & i).EntireRow.Interior.Color = xlNone
+        Range("A" & i).EntireRow.Font.Color = vbBlack
+    Next
+
+    'Reset all option button and checkboxes
+    ActiveSheet.OptionButtons("optRegion").Value = xlOff
+    ActiveSheet.OptionButtons("optItem").Value = xlOff
+
+    ActiveSheet.CheckBoxes("chkLowestSales").Value = xlOff
+    ActiveSheet.CheckBoxes("chkHighestSales").Value = xlOff
+
+End Sub
+Sub report_item()
+    'Select
+    Sheets("SalesOrders").Select
+
+    'Get the No Row
+    r = Range("A1").End(xlDown).Row
+
+    'Copy whole of column D and G ... just 2 Column
+    Range("D:D, G:G").Copy
+
+    'Got to sheets "Report_Month"
+    Sheets("Report_Item").Select
+    'Paste the copied Columns
+    'Select cell A1
+    Range("A1").Select
+    'Paste Records
+    ActiveSheet.Paste
+
+    'Rename the total to total Sales in cell B1
+    Cells(1, "B").Value = "Total Sales"
+
+    'Sort the Region
+    Columns("A:B").Sort key1:=Range("A2"), order1:=xlAscending, Header:=xlYes
+
+    'Select cell B2
+    Range("B2").Select
+    Do Until Selection.Value = ""
+        'If the the column next to cell B2 (C2) Value is same with the value in the....
+        'Row after cell B2 and the column next to cell B2 (C3)
+        '(1,1) - C3 (0,1) - C2
+        If Selection.Offset(0, -1).Value = Selection.Offset(1, -1).Value Then
+            'B2.Value = B2.Value + B3.Value
+            Selection.Value = Selection.Value + Selection.Offset(1, 0).Value
+            'Delete entire row of (1,0) and Shift Upwards
+            Selection.Offset(1, 0).EntireRow.Delete shift:=xlShiftUp
+        Else
+            'Select the following selection
+            Selection.Offset(1, 0).Select
+        End If
+    Loop
+
+     'Auto-adjust Column Size
+    Columns("A:B").EntireColumn.AutoFit
+
+    'Back to the Original Worksheet
+    Sheets("SalesOrders").Select
+
+End Sub
+Sub report_region()
+    'Select
+    Sheets("SalesOrders").Select
+
+    'Get the No Row
+    r = Range("A1").End(xlDown).Row
+
+    'Copy whole of column B and G ... just 2 Column
+    Range("B:B, G:G").Copy
+
+
+    'Got to sheets "Report_Month"
+    Sheets("Report_Region").Select
+    'Paste the copied Columns
+    'Select cell A1
+    Range("A1").Select
+    'Paste Records
+    ActiveSheet.Paste
+
+    'Rename the total to total Sales in cell B1
+    Cells(1, "B").Value = "Total Sales"
+
+    'Sort the Region
+    Columns("A:B").Sort key1:=Range("A2"), order1:=xlAscending, Header:=xlYes
+
+
+    'Select cell B2
+    Range("B2").Select
+    Do Until Selection.Value = ""
+        'If the the column next to cell B2 (C2) Value is same with the value in the....
+        'Row after cell B2 and the column next to cell B2 (C3)
+        '(1,1) - C3 (0,1) - C2
+        If Selection.Offset(0, -1).Value = Selection.Offset(1, -1).Value Then
+            'B2.Value = B2.Value + B3.Value
+            Selection.Value = Selection.Value + Selection.Offset(1, 0).Value
+            'Delete entire row of (1,0) and Shift Upwards
+            Selection.Offset(1, 0).EntireRow.Delete shift:=xlShiftUp
+        Else
+            'Select the following selection
+            Selection.Offset(1, 0).Select
+        End If
+    Loop
+
+    'Auto-adjust Column Size
+    Columns("A:B").EntireColumn.AutoFit
+
+    'Back to the Original Worksheet
+    Sheets("SalesOrders").Select
+End Sub
+Sub report_month()
+    'Slect sheets "SalesOrders"
+    Sheets("SalesOrders").Select
+    'Copy whole of column A and G ... just 2 Column
+    Range("A:A, G:G").Copy
+
+    'Got to sheets "Report_Month"
+    Sheets("Report_Month").Select
+    'Paste the copied Columns
+    'Select cell A1
+    Range("A1").Select
+    'Paste Records
+    ActiveSheet.Paste
+
+    'Rename the total to total Sales in cell B1
+    Cells(1, "B").Value = "Total Sales"
+
+    r = Range("A1").End(xlDown).Row
+
+    'For Loop
+    For q = 2 To r
+        'Extract Year and Month from cells in Column A to cells in Column C
+        Cells(q, 3).Value = Year(Cells(q, "A")) & " " & Month(Cells(q, "A"))
+        Cells(q, 1).Value = Cells(q, 3)
+    Next
+
+    'Colum: Total Sales
+    Range("B2").Select
+
+    Do Until Selection.Value = ""
+        'If the the column next to cell B2 (C2) Value is same with the value in the....
+        'Row after cell B2 and the column next to cell B2 (C3)
+        '(1,1) - C3 (0,1) - C2
+        If Selection.Offset(0, 1).Value = Selection.Offset(1, 1).Value Then
+            'B2.Value = B2.Value + B3.Value
+            Selection.Value = Selection.Value + Selection.Offset(1, 0).Value
+            'Delete entire row of (1,0) and Shift Upwards
+            Selection.Offset(1, 0).EntireRow.Delete shift:=xlShiftUp
+        Else
+            'Select the following selection
+            Selection.Offset(1, 0).Select
+        End If
+    Loop
+
+    'Clear the content of column C
+    Worksheets("Report_Month").Columns("C").ClearContents
+    'Auto-adjust Column Size
+    Columns("A:B").EntireColumn.AutoFit
+
+    'Back to the Original Worksheet
+    Sheets("SalesOrders").Select
+
+End Sub
+Sub btnReport_Click()
+    Call report_month
+    Call report_region
+    Call report_item
+End Sub

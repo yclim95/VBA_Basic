@@ -1,0 +1,24 @@
+Sub calculateAverage()
+    Sheets("ExerciseB").Select
+    Range("E2").Select
+
+    Set sh = ThisWorkbook.Sheets("ExereciseA")
+    numOfRow = sh.Range("A2", sh.Range("A2").End(xlDown)).Rows.Count
+    r = Range("A1").End(xlDown).Row
+
+    Do Until Selection.Offset(0, -4).Value = ""
+    'Add all the score and average it then give 1 decimal point.
+         Selection.Value = Round((Selection.Offset(0, -3).Value + Selection.Offset(0, -2) + Selection.Offset(0, -2) + Selection.Offset(0, -1)) / 3, 1)
+
+         Selection.Offset(1, 0).Select
+    Loop
+
+    For q = 2 To r
+        If Cells(q, "E").Value < 50 Then
+            Range(Cells(q, "A"), Cells(q, "E")).Interior.Color = vbYellow
+        Else
+            Range(Cells(q, "A"), Cells(q, "E")).Interior.Color = vbWhite
+        End If
+    Next
+
+End Sub

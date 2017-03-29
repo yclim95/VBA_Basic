@@ -1,0 +1,6 @@
+Sub proFirst()
+    Range("A1").Value = 34
+    Range("A2").Value = 66
+    Range("A3").Formula = "=A1+A2"
+    Range("A1").Select
+End Sub

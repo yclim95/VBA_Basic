@@ -1,0 +1,21 @@
+Sub checkStatus()
+    Sheets("ExereciseA").Select
+    Set sh = ThisWorkbook.Sheets("ExereciseA")
+    numOfRow = sh.Range("A2", sh.Range("A2").End(xlDown)).Rows.Count
+    Range("D2").Select
+    Average = 0
+    Do Until Selection.Offset(0, -3).Value = ""
+        score = Selection.Offset(0, -1).Value
+
+        If score >= 40 Then
+            result = "pass"
+        Else
+            result = "fail"
+        End If
+        Selection.Value = result
+        Average = Average + score
+        Selection.Offset(1, 0).Select
+
+    Loop
+    MsgBox ("Average is " & Average / numOfRow)
+End Sub

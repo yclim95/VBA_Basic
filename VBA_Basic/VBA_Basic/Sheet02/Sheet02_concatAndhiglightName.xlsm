@@ -1,0 +1,31 @@
+Sub concatName()
+'Select Sheet2 at the active sheet.
+    Sheets("Sheet2").Select
+'Click on the cell c2.
+    Range("C2").Select
+
+'Peform iteractive loop on the selected cells as long as the cell that located on the left second at the selected cell is not empty.
+'Selection.Offset(Current Selected Cell, number after the cell.
+'Number of spacing after the cell("-2") - 2 position to the left.... (2) - 2 position to the right.
+
+    Do Until Selection.Offset(0, -2).Value = ""
+        Selection.Value = Selection.Offset(0, -2).Value & " " & Selection.Offset(0, -1)
+        'Move to the slection to the next cell below the current seated cell.
+        Selection.Offset(1, 0).Select
+    Loop
+
+    Range("A2").Select
+
+End Sub
+
+Sub highlightName()
+    Sheets("Sheet2").Select
+    r = Range("A1").End(xlDown).Row
+
+    For q = 2 To r
+        If UCase(Cells(q, "A").Text) Like UCase("c") & "*" Then
+            Range(Cells(q, "A"), Cells(q, "C")).Interior.Color = vbRed
+        End If
+    Next
+
+End Sub

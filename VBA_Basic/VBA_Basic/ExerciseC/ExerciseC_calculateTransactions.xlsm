@@ -1,0 +1,30 @@
+Sub calculateTransactions()
+    Sheets("ExerciseC").Select
+    Range("G2").Select
+    numOfSept = 0
+    numOfOct = 0
+    amOfSept = 0
+    amOfOct = 0
+
+    r = Range("B1").End(xlDown).Row
+
+    For q = 2 To r
+        If Month(Cells(q, "B")) = 9 Then
+            numOfSept = numOfSept + 1
+            amOfSept = amOfSept + Cells(q, "C").Value
+        End If
+
+        If Month(Cells(q, "B")) = 10 Then
+            numOfOct = numOfOct + 1
+            amOfOct = amOfOct + Cells(q, "C").Value
+        End If
+
+    Next
+
+    Cells(2, "G").Value = numOfSept
+    Cells(3, "G").Value = numOfOct
+
+    Cells(2, "H").Value = amOfSept
+    Cells(3, "H").Value = amOfOct
+    MsgBox (Cells(2, "C").Value)
+End Sub
